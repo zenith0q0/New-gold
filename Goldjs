@@ -1,54 +1,30 @@
-// Configuration
-const TAP_AREA_SELECTOR = "._tapArea_njdmz_15"; // Your CSS selector
-const MIN_CLICKS = 300; // Minimum clicks per session
-const MAX_CLICKS = 500; // Maximum clicks per session
-const SLEEP_TIME = 7 * 60 * 1000; // Sleep time in milliseconds (7 minutes)
+// Web Worker Auto-Tapper Script
+self.onmessage = function(event) {
+    if (event.data === "start") {
+        console.log("[INFO] Auto-tapper started in Web Worker");
 
-// Function to generate a random delay between 100ms and 300ms
-function getRandomDelay() {
-    return Math.random() * (300 - 100) + 100; // Random delay between 100ms and 300ms
-}
+        function getRandomDelay() {
+            return Math.random() * (300 - 100) + 100; // 100ms - 300ms delay
+        }
 
-// Function to generate a random number of clicks for the session
-function getRandomClickCount() {
-    return Math.floor(Math.random() * (MAX_CLICKS - MIN_CLICKS + 1)) + MIN_CLICKS;
-}
+        function getRandomClickCount() {
+            return Math.floor(Math.random() * (500 - 300 + 1)) + 300; // 300-500 clicks
+        }
 
-// Function to click the element
-async function autoClick() {
-    while (true) {
-        const tapArea = document.querySelector(TAP_AREA_SELECTOR);
-        if (tapArea) {
-            const clickCount = getRandomClickCount();
-            console.log("[INFO] Starting new session with " + clickCount + " clicks.");
-            
-            // Start click session
+        function startTapping() {
+            let clickCount = getRandomClickCount();
+            self.postMessage({ action: "log", message: `[INFO] Starting session with ${clickCount} clicks.` });
+
             for (let i = 0; i < clickCount; i++) {
-                tapArea.click(); // Click the element
-                console.log("[INFO] Click " + (i + 1) + " of " + clickCount);
-                let delay = getRandomDelay(); // Get random delay
-                console.log("Waiting for " + delay.toFixed(2) + " ms");
-                
-                // Wait for the delay and log after it
-                await new Promise(resolve => setTimeout(resolve, delay));
-                console.log("Delay ended, starting next click.");
+                setTimeout(() => {
+                    self.postMessage({ action: "click" }); // Send "click" action to main script
+                }, i * getRandomDelay());
             }
 
-            console.log("[INFO] Completed " + clickCount + " clicks. Going to sleep for 7 minutes.");
-            
-            // Explicitly wait 7 minutes and log it
-            await new Promise(resolve => {
-                setTimeout(() => {
-                    console.log("[INFO] Waking up from sleep, starting new session.");
-                    resolve();
-                }, SLEEP_TIME);
-            });
-        } else {
-            console.error("[ERROR] Element not found.");
-            break; // Exit the loop if the element is not found
+            self.postMessage({ action: "sleep", message: "[INFO] Sleeping for 7 minutes..." });
+            setTimeout(startTapping, 7 * 60 * 1000); // Sleep for 7 minutes, then restart
         }
-    }
-}
 
-// Start the auto-clicker
-autoClick();
+        startTapping();
+    }
+};
