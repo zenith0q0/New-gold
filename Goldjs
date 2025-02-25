@@ -3,12 +3,14 @@ self.onmessage = function(event) {
     if (event.data === "start") {
         console.log("[INFO] Auto-tapper started in Web Worker");
 
+        // Random delay between taps (100ms - 300ms)
         function getRandomDelay() {
-            return Math.random() * (300 - 100) + 100; // 100ms - 300ms delay
+            return Math.random() * (300 - 100) + 100;
         }
 
+        // Random tap count between 200 and 300
         function getRandomClickCount() {
-            return Math.floor(Math.random() * (500 - 300 + 1)) + 300; // 300-500 clicks
+            return Math.floor(Math.random() * (300 - 200 + 1)) + 200;
         }
 
         function startTapping() {
@@ -21,8 +23,9 @@ self.onmessage = function(event) {
                 }, i * getRandomDelay());
             }
 
-            self.postMessage({ action: "sleep", message: "[INFO] Sleeping for 7 minutes..." });
-            setTimeout(startTapping, 7 * 60 * 1000); // Sleep for 7 minutes, then restart
+            // Sleep for 3.5 minutes (210,000 ms) and restart
+            self.postMessage({ action: "sleep", message: "[INFO] Sleeping for 3.5 minutes..." });
+            setTimeout(startTapping, 210000);
         }
 
         startTapping();
